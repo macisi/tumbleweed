@@ -1,0 +1,8 @@
+productName: Weibo Client
+appId: com.app.weibo-client
+directories:
+  buildResources: resources
+  output: dist
+  app: app
+asar: true
+publish: null

@@ -2,8 +2,15 @@
   "name": "weibo-client",
   "version": "0.0.1",
   "description": "another weibo-client",
-  "main": "./index.js",
-  "scripts": {},
+  "main": "index.js",
+  "scripts": {
+    "electron-rebuild": "node ../config/ElectronRebuild.js",
+    "postinstall": "npm run electron-rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/macisi/weibo-client.git"
+  },
   "keywords": [
     "electron"
   ],
@@ -13,6 +20,6 @@
     "url": "https://github.com/macisi/weibo-client/issues"
   },
   "homepage": "https://github.com/macisi/weibo-client#readme",
-  "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+  }
 }

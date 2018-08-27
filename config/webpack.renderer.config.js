@@ -27,29 +27,17 @@ module.exports = {
             use: {
               loader: 'babel-loader',
               options: {
-                presets: [
-                  [
-                    '@babel/preset-env',
-                    {
-                      targets: {
-                        chrome: 66,
-                      },
-                      useBuiltIns: 'usage',
-                      modules: false,
-                      shippedProposals: true,
-                      debug: false,
-                    },
-                  ],
-                  '@babel/preset-react',
-                ],
-                plugins: [
-                  'react-hot-loader/babel',
-                  'styled-components',
-                ],
-                cacheDirectory: true,
-                babelrc: false,
+                cacheDirectory: false,
+                babelrc: true,
               },
             },
+          },
+          {
+            test: /\.css$/,
+            use: [
+              { loader: 'style-loader' },
+              { loader: 'css-loader' },
+            ],
           },
           {
             exclude: [/\.js$/, /\.html$/, /\.json$/],
@@ -64,15 +52,19 @@ module.exports = {
       }
     ],
   },
-  externals: [
-  ],
-  devtool: 'cheap-module-source-map',
+  resolve: {
+    alias: {
+      mobx: path.resolve(__dirname, '../node_modules/mobx/lib/mobx.es6.js'),
+      pouchdb: path.resolve(__dirname, '../node_modules/pouchdb/lib/index-browser.es'),
+    },
+  },
+  devtool: process.env.WEBPACK_SERVE ? 'cheap-module-source-map' : 'none',
   plugins: [
-    new HtmlWebpackPlugin({
-      template: './app/index.html',
-    }),
     new webpack.ProvidePlugin({
       React: 'react',
+    }),
+    new HtmlWebpackPlugin({
+      template: './public/index.html',
     }),
   ],
   optimization: {

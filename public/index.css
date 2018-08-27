@@ -1,0 +1,13 @@
+html {
+  height: 100%;
+  font-size: 12px;
+}
+
+body {
+  height: 100%;
+}
+
+#App {
+  display: flex;
+  height: 100%;
+}

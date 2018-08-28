@@ -20,6 +20,5 @@
     "url": "https://github.com/macisi/weibo-client/issues"
   },
   "homepage": "https://github.com/macisi/weibo-client#readme",
-  "dependencies": {
-  }
+  "dependencies": {}
 }

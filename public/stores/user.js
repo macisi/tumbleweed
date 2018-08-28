@@ -24,9 +24,11 @@ class User {
         headers: this.oauth.headers,
       });
       const userInfo = await response.json();
-      runInAction('assign_user_info', () => {
-        this.userInfo = userInfo;
-      });
+      if (!userInfo.error) {
+        runInAction('assign_user_info', () => {
+          this.userInfo = userInfo;
+        });
+      }
     } catch (e) {
       // TODO: handle error
     }

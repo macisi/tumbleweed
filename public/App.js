@@ -55,7 +55,7 @@ const App = () => {
           <LocationProvider history={history}>
             <SideBar />
             <Authorization>
-              <Router>
+              <Router className="content">
                 <Dashboard path="/" />
                 <UserPage path="/user/:uid" />
               </Router>

@@ -4,33 +4,30 @@
  * @date 2018-08-27
  * @class Timeline
  */
-import { action, computed, observable, runInAction } from 'mobx';
+import { action, observable, runInAction } from 'mobx';
 
 import { HOME_TIMELINE, USER_TIMELINE } from '../../share/API';
 import oauth from './oauth';
 
 class Timeline {
-  @observable posts = [];
+  @observable.shallow posts = [];
+  @observable totalCount = 0;
   @observable state = 'done'; // done pending error
+  @observable max_id = undefined;
+  @observable since_id = undefined;
   constructor(uid) {
     this.count = 20;
     this.uid = uid;
   }
-  @computed get since_id() {
-    return this.posts.length > 0 ? this.posts[0].id : 0;
-  }
-  @computed get max_id() {
-    return this.posts.length > 0 ? this.posts[this.posts.length - 1].id : 0;
-  }
   @action.bound
-  async getPosts(page) {
+  async getPosts(latest = false, count = 20) {
     const params = new URLSearchParams({
-      since_id: this.since_id,
-      max_id: this.max_id,
-      count: this.count,
+      count,
     });
-    if (typeof page !== 'undefined') {
-      params.append('page', page);
+    if (latest) {
+      params.append('since_id', this.since_id || 0);
+    } else {
+      params.append('max_id', this.max_id || 0);
     }
     try {
       this.state = 'pending';
@@ -38,13 +35,29 @@ class Timeline {
         headers: oauth.headers,
       });
       const result = await response.json();
-      runInAction('GET_POSTS', () => {
-        this.state = 'done';
-        this.posts = this.posts.concat(result.statuses);
-      });
+      if (!result.error) {
+        runInAction('GET_POSTS', () => {
+          this.state = 'done';
+          if (latest) {
+            this.posts = result.statuses.concat(this.posts);
+          } else {
+            this.posts = this.posts.concat(result.statuses);
+          }
+          this.totalCount = result.total_number;
+          this.since_id = result.since_id;
+          this.max_id = result.max_id;
+        });
+      } else {
+        // TODO: error handle
+        runInAction(() => {
+          this.state = 'done';
+        });
+      }
     } catch (err) {
       // TODO: handle err
-      this.state = 'error';
+      runInAction(() => {
+        this.state = 'error';
+      });
     }
   }
 }

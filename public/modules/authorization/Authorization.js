@@ -7,7 +7,15 @@
  */
 import { Component } from 'react';
 import { inject, observer, PropTypes } from 'mobx-react';
+import { withStyles } from '@material-ui/core/styles';
 
+const styles = theme => ({
+  main: {
+    width: `calc(100% - ${40 + theme.spacing.unit * 2}px)`,
+  },
+});
+
+@withStyles(styles)
 @inject('oauth')
 @observer
 export default class Authorization extends Component {
@@ -27,9 +35,9 @@ export default class Authorization extends Component {
     return this.props.children;
   }
   render() {
-    const { oauth } = this.props;
+    const { oauth, classes } = this.props;
     return (
-      <main>
+      <main className={classes.main}>
         {
           oauth.accessToken ?
             this.renderContent() :

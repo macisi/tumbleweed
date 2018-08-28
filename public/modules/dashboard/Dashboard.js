@@ -18,10 +18,13 @@ export default class Dashboard extends Component {
     currentUser: PropTypes.observableObject,
     myTimeline: PropTypes.observableObject,
   }
-  componentDidMount() {
-    this.props.myTimeline.getPosts();
-  }
   render() {
-    return <Timeline posts={this.props.myTimeline.posts} />;
+    return (
+      <Timeline
+        posts={this.props.myTimeline.posts}
+        totalCount={this.props.myTimeline.totalCount}
+        getData={this.props.myTimeline.getPosts}
+      />
+    );
   }
 }

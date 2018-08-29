@@ -6,7 +6,7 @@ if (isDev) {
   const PATH_APP_NODE_MODULES = path.join(__dirname, '..', 'app', 'node_modules');
   require('module').globalPaths.push(PATH_APP_NODE_MODULES);
 }
-const serviceRegister = require('./serviceRegister');
+// const serviceRegister = require('./serviceRegister');
 
 const gotTheLock = app.requestSingleInstanceLock();
 let mainWindow;
@@ -48,13 +48,12 @@ if (!gotTheLock) {
       mainWindow.openDevTools();
     }
 
-    serviceRegister({
-      mainWindow,
-    });
+    // serviceRegister({
+    //   mainWindow,
+    // });
   });
 
   app.on('window-all-closed', () => {
     app.quit();
   });
 }
-

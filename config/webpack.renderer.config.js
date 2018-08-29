@@ -54,7 +54,6 @@ module.exports = {
   },
   resolve: {
     alias: {
-      mobx: path.resolve(__dirname, '../node_modules/mobx/lib/mobx.es6.js'),
       pouchdb: path.resolve(__dirname, '../node_modules/pouchdb/lib/index-browser.es'),
     },
   },

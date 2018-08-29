@@ -5,13 +5,9 @@
  * @export
  */
 import { Component } from 'react';
-import { inject, observer, PropTypes } from 'mobx-react';
 
-@inject('currentUser')
-@observer
 export default class UserPage extends Component {
   static propTypes = {
-    currentUser: PropTypes.observableObject,
   }
   render() {
     const { userInfo } = this.props.currentUser;

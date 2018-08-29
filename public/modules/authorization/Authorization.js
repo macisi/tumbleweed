@@ -5,9 +5,16 @@
  * @export Authorization
  * @extends {Component}
  */
-import { Component } from 'react';
-import { inject, observer, PropTypes } from 'mobx-react';
+import { ipcRenderer } from 'electron';
+import { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+
+import { GET_ACCESS_TOKEN } from '../../../share/IPC_COMMANDS';
+
+import { actions } from './store';
 
 const styles = theme => ({
   main: {
@@ -16,34 +23,59 @@ const styles = theme => ({
 });
 
 @withStyles(styles)
-@inject('oauth')
-@observer
-export default class Authorization extends Component {
+class Authorization extends PureComponent {
   static propTypes = {
-    oauth: PropTypes.observableObject,
+    login: PropTypes.bool,
+    doLogin: PropTypes.func,
+    loginIn: PropTypes.func,
+  }
+  componentDidMount() {
+    ipcRenderer.on(GET_ACCESS_TOKEN, this.getAccessToken);
+  }
+  componentWillUnmount() {
+    ipcRenderer.removeListener(GET_ACCESS_TOKEN, this.getAccessToken);
+  }
+  getAccessToken = (event, data) => {
+    this.props.loginIn(data);
   }
   handleLogin = () => {
-    this.props.oauth.login();
-  }
-  validate() {
-    // TODO: validate the accessToken
+    this.props.doLogin();
   }
   renderLoginPane() {
-    return <button onClick={this.handleLogin}>登陆</button>;
+    const props = {
+      variant: 'contained',
+      color: 'primary',
+      onClick: this.handleLogin,
+    };
+    return <Button {...props}>登陆</Button>;
   }
   renderContent() {
     return this.props.children;
   }
   render() {
-    const { oauth, classes } = this.props;
+    const { classes } = this.props;
+    console.log(this.props);
     return (
       <main className={classes.main}>
         {
-          oauth.accessToken ?
-            this.renderContent() :
-            this.renderLoginPane()
+          // this.renderContent()
+          this.renderLoginPane()
         }
       </main>
     );
   }
 }
+
+const mapStateToProps = state => ({
+  login: state.auth.get('login'),
+  pending: state.auth.get('pending'),
+});
+const mapDispatchToProps = dispatch => ({
+  doLogin: () => dispatch(actions.requestLogin()),
+  loginIn: data => dispatch(actions.loginIn(data)),
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Authorization);

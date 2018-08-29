@@ -6,7 +6,6 @@
  * @extends {Component}
  */
 import { Component, Fragment, createRef } from 'react';
-import { observer, PropTypes as MobxPropTypes } from 'mobx-react';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -33,21 +32,18 @@ const styles = theme => ({
   },
 });
 
-const cache = new CellMeasurerCache({
-  defaultHeight: 30,
-  fixedWidth: true,
-});
-
 @withStyles(styles)
-@observer
 export default class Timeline extends Component {
   static propTypes = {
-    posts: MobxPropTypes.observableArray,
     totalCount: PropTypes.number,
     getData: PropTypes.func,
   };
   rootNode = createRef();
-  // list = createRef();
+  list = createRef();
+  measureCache = new CellMeasurerCache({
+    defaultHeight: 30,
+    fixedWidth: true,
+  });
   componentDidMount() {
     this.props.getData(true);
     const ro = new ResizeObserver(entries => {
@@ -64,9 +60,9 @@ export default class Timeline extends Component {
     if (this.containerWidth !== rect.width) {
       this.clearTimer && clearTimeout(this.clearTimer);
       this.clearTimer = setTimeout(() => {
-        cache.clearAll();
+        this.measureCache.clearAll();
         this.containerWidth = rect.width;
-        // this.list.current.recomputeRowHeights();
+        this.list.recomputeRowHeights();
       }, 200);
     }
   }
@@ -77,74 +73,74 @@ export default class Timeline extends Component {
   }
   isRowLoaded = ({ index }) => {
     const { posts } = this.props;
-    return !!posts[index] && (index <= posts.length - 1);
+    return (index <= posts.length - 1) && !!posts[index];
   }
   renderPost = ({ key, index, parent, style }) => {
-    const post = this.props.posts[index];
-    const { classes } = this.props;
     let content;
-    if (!post) {
+    if (index >= this.props.posts.length) {
       content = (
-        <CardContent>
-          <Typography>pending</Typography>
-        </CardContent>
+        <Card
+          key={key}
+          style={style}
+        >
+          <CardContent>
+            <Typography>pending</Typography>
+          </CardContent>
+        </Card>
       );
     } else {
+      const post = this.props.posts[index];
       content = (
-        <Fragment>
-          <CardHeader
-            avatar={
-              <Avatar src={post.user.avatar_large} />
-            }
-            action={
-              <IconButton>
-                <MoreVert />
+        <CellMeasurer
+          cache={this.measureCache}
+          key={key}
+          columnIndex={0}
+          rowIndex={index}
+          parent={parent}
+        >
+          <Card style={style}>
+            <CardHeader
+              avatar={
+                <Avatar src={post.user.avatar_large} />
+              }
+              action={
+                <IconButton>
+                  <MoreVert />
+                </IconButton>
+              }
+              title={post.user.screen_name}
+              subheader={
+                <Fragment>
+                  <span>{moment(post.created_at).toNow()}</span>
+                  <span dangerouslySetInnerHTML={{__html: post.source}} />
+                </Fragment>
+              }
+            />
+            <CardContent>
+              <Typography>{ post.text }</Typography>
+              {
+                post.pic_urls &&
+                post.pic_urls.map(pic => (
+                  <img key={pic.thumbnail_pic} src={pic.thumbnail_pic} alt="" />
+                ))
+              }
+            </CardContent>
+            <CardActions>
+              <IconButton aria-label="favorite">
+                <Favorite />
               </IconButton>
-            }
-            title={post.user.screen_name}
-            subheader={
-              <Fragment>
-                <span>{moment(post.created_at).toNow()}</span>
-                <span dangerouslySetInnerHTML={{__html: post.source}} />
-              </Fragment>
-            }
-          />
-          <CardContent>
-            <Typography>{ post.text }</Typography>
-            {
-              post.pic_urls &&
-              post.pic_urls.map(pic => (
-                <img key={pic.thumbnail_pic} src={pic.thumbnail_pic} alt="" />
-              ))
-            }
-          </CardContent>
-          <CardActions>
-            <IconButton aria-label="favorite">
-              <Favorite />
-            </IconButton>
-            <IconButton aria-label="praise">
-              <ThumbUp />
-            </IconButton>
-            <IconButton aria-label="comment">
-              <Comment />
-            </IconButton>
-          </CardActions>
-        </Fragment>
+              <IconButton aria-label="praise">
+                <ThumbUp />
+              </IconButton>
+              <IconButton aria-label="comment">
+                <Comment />
+              </IconButton>
+            </CardActions>
+          </Card>
+        </CellMeasurer>
       );
     }
-    return (
-      <CellMeasurer
-        cache={cache}
-        key={key}
-        columnIndex={0}
-        rowIndex={index}
-        parent={parent}
-      >
-        <Card
-          style={style}
-        >{content}</Card>
-      </CellMeasurer>
-    );
+    return content;
   }
   render() {
     const { classes, totalCount } = this.props;
@@ -163,14 +159,17 @@ export default class Timeline extends Component {
             <AutoSizer>
               {({ width, height }) => (
                 <List
-                  ref={registerChild}
+                  ref={ref => {
+                    this.list = ref;
+                    registerChild(ref);
+                  }}
                   width={width}
                   height={height}
                   rowCount={totalCount}
-                  rowHeight={cache.rowHeight}
+                  rowHeight={this.measureCache.rowHeight}
                   rowRenderer={this.renderPost}
                   onRowsRendered={onRowsRendered}
-                  deferredMeasurementCache={cache}
+                  deferredMeasurementCache={this.measureCache}
                 />
               )}
             </AutoSizer>

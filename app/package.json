@@ -1,7 +1,7 @@
 {
-  "name": "weibo-client",
+  "name": "tumbleweed",
   "version": "0.0.1",
-  "description": "another weibo-client",
+  "description": "another tumblr client",
   "main": "index.js",
   "scripts": {
     "electron-rebuild": "node ../config/ElectronRebuild.js",

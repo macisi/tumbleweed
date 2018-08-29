@@ -7,16 +7,11 @@
  * @extends {Component}
  */
 import { Component } from 'react';
-import { inject, observer, PropTypes } from 'mobx-react';
 
 import Timeline from '../../components/timeline/';
 
-@inject('currentUser', 'myTimeline')
-@observer
 export default class Dashboard extends Component {
   static propTypes = {
-    currentUser: PropTypes.observableObject,
-    myTimeline: PropTypes.observableObject,
   }
   render() {
     return (
